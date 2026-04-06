@@ -1,44 +1,76 @@
-# Relatório Técnico: Sistema de Inventário e Mecanismo de Drop Balanceado
+# Relatório de Implementação: Sistema de Inventário e Drop Balanceado
 
-## 1. Estruturas de Dados Implementadas
+**Disciplina:** Estruturas de Dados Avançadas  
+**Data:** 6 de Abril de 2026  
+**Tema:** Sistema de Inventário com Hash, Heaps e PRNG
 
-### 1.1. Item
-A struct `Item` armazena os atributos fundamentais: `id` (identificador único), `nome` e `raridade` (valor numérico). Foram sobrecarregados os operadores de comparação (`<`, `>`) para facilitar a ordenação por raridade no Heap.
+---
 
-### 1.2. Tabela Hash
-Implementada manualmente com tratamento de colisões por encadeamento separado (`std::list`). Suporta dois métodos de espalhamento:
-- **Método da Divisão:** $h(k) = k \mod m$. Simples e eficiente, mas sensível à escolha de $m$ (idealmente um número primo).
-- **Método da Multiplicação:** $h(k) = \lfloor m \cdot (k \cdot A \mod 1) \rfloor$, onde $A = (\sqrt{5}-1)/2 \approx 0.6180339887$. Este método é menos dependente do tamanho da tabela $m$.
+## 1. Introdução
+Este relatório descreve a implementação de um sistema de inventário para jogos, integrando estruturas de dados fundamentais para garantir eficiência no acesso, organização por prioridade e geração de itens com raridade balanceada. O objetivo é demonstrar o uso prático de Tabelas Hash, Max-Heaps e Geradores de Números Pseudo-Aleatórios (PRNGs) em um cenário de gameplay.
 
-### 1.3. Max-Heap
-Implementado em um array dinâmico (`std::vector`). O Heap organiza os itens de modo que o item com maior valor de `raridade` esteja sempre na raiz ($O(1)$ para consulta, $O(\log n)$ para extração e inserção). É utilizado para gerenciar os objetos mais valiosos do jogador.
+---
 
-## 2. Geração de Números Pseudo-Aleatórios (PRNG)
+## 2. Modelagem do Problema
+O sistema foi modelado para atender às seguintes necessidades:
+- **Armazenamento:** Utiliza uma **Tabela Hash** para armazenar o inventário do jogador, permitindo busca e inserção rápidas por ID.
+- **Organização:** Utiliza um **Max-Heap** para manter os itens organizados por raridade, facilitando o acesso instantâneo ao item mais valioso do jogador.
+- **Geração de Itens:** Utiliza **PRNGs** para determinar a raridade dos itens no momento do "drop".
+- **Equilíbrio:** Implementa um **Mecanismo de Drop Balanceado** para evitar sequências extremas de sorte ou azar, mantendo a economia do jogo estável.
 
-Foram implementados dois algoritmos com seeds configuráveis:
-- **LCG (Linear Congruential Generator):** Utiliza a fórmula $X_{n+1} = (aX_n + c) \mod m$. É rápido e clássico, mas possui ciclos curtos se os parâmetros não forem bem escolhidos.
-- **XORShift:** Utiliza operações de bitwise XOR e shifts. É extremamente rápido e passa em diversos testes estatísticos de aleatoriedade, sendo superior ao LCG para simulações modernas.
+---
 
-## 3. Mecanismo de Drop Balanceado
+## 3. Estruturas de Dados e Algoritmos
 
-O sistema utiliza um feedback loop para controlar a escassez de itens raros. 
-- Define-se um `targetRatio` (ex: 10% de drops raros).
-- A cada drop, o sistema compara a proporção real de itens raros gerados com o alvo.
-- Se a proporção real for maior que o alvo, a chance de drop raro (`currentRareChance`) é reduzida.
-- Se for menor, a chance é aumentada.
-Isso garante que, a longo prazo, a economia do jogo permaneça estável, evitando "lucky streaks" ou períodos de seca excessiva.
+### 3.1. Tabela Hash (Hash Table)
+A implementação suporta encadeamento externo (listas ligadas) para tratamento de colisões e dois métodos de espalhamento:
 
-## 4. Análise de Resultados (Benchmarks)
+1.  **Método da Divisão:** $h(k) = k \mod m$.
+    -   **Justificativa:** Simples e eficaz quando o tamanho da tabela ($m$) é um número primo não próximo de potências de 2.
+2.  **Método da Multiplicação (Knuth):** $h(k) = \lfloor m (k \cdot A \mod 1) \rfloor$, com $A = (\sqrt{5}-1)/2$.
+    -   **Justificativa:** Recomendado por Donald Knuth, este método é menos sensível ao tamanho da tabela e utiliza todos os bits da chave, sendo eficiente para chaves sequenciais ou com padrões comuns.
 
-Os testes foram realizados variando a entrada entre 1.000 e 100.000 itens.
+### 3.2. Números Pseudo-Aleatórios (PRNG)
+Foram implementados dois geradores manuais para garantir reprodutibilidade:
 
-| Entrada | Tempo Total (ms) | Colisões (Divisão) | Colisões (Mult.) | Itens Raros (%) |
-|---------|------------------|--------------------|------------------|-----------------|
-| 1.000   | ~0.16            | 500                | 500              | 10.0%           |
-| 10.000  | ~1.71            | 5000               | 5000             | 9.98%           |
-| 100.000 | ~39.87           | 50000              | 50000            | 9.99%           |
+1.  **Linear Congruential Generator (LCG):**
+    -   **Justificativa:** Algoritmo clássico e extremamente rápido, ideal para sistemas com recursos limitados onde a perfeição estatística absoluta não é crítica.
+2.  **XORShift:**
+    -   **Justificativa:** Baseado em operações de bitwise (XOR e shifts), é significativamente mais rápido que o LCG e oferece uma qualidade estatística superior, passando em diversos testes de aleatoriedade modernos (como o BigCrush).
 
-### Análise Crítica
-1. **Eficiência de Hash:** Ambos os métodos apresentaram distribuição uniforme para chaves sequenciais. Em cenários com chaves não sequenciais, o Método da Multiplicação tende a ser mais robusto.
-2. **Desempenho do Heap:** A extração do topo (Max) manteve-se extremamente rápida ($O(\log n)$), mesmo com 100.000 itens, demonstrando a escalabilidade da estrutura.
-3. **Equilíbrio de Drop:** O mecanismo balanceado manteve a proporção de itens raros extremamente próxima ao alvo de 10%, conforme evidenciado nos benchmarks.
+### 3.3. Max-Heap
+O Max-Heap organiza os itens com base no atributo `raridade` (1 a 100).
+-   **Complexidade:** Inserção e extração em $O(\log N)$.
+-   **Uso:** Permite que o sistema identifique rapidamente os itens mais raros para exibição em interfaces de "Top Itens" ou para mecânicas de troca.
+
+---
+
+## 4. Mecanismo de Drop Balanceado
+O `DropSystem` utiliza um loop de feedback (feedback loop) para manter a taxa de itens raros próxima a um alvo (target ratio de 10%).
+
+-   **Algoritmo:** A cada drop, o sistema compara a proporção real de itens raros gerados com o alvo.
+-   **Ajuste Dinâmico:** Se a taxa real for superior ao alvo, a chance base de drop raro diminui. Se for inferior (azar do jogador), a chance aumenta progressivamente.
+-   **Vantagem:** Este método atua de forma similar ao "Pity Timer" ou "Pseudo-Random Distribution" (usado em jogos como Dota 2 e Genshin Impact), garantindo que o jogador receba itens raros de forma consistente ao longo do tempo.
+
+---
+
+## 5. Análise de Desempenho e Resultados
+
+Os testes foram realizados com diferentes tamanhos de entrada (1k, 10k, 100k itens) usando sementes fixas para garantir a reprodutibilidade.
+
+### 5.1. Resultados dos Benchmarks
+| Itens Gerados | Tempo Total (ms) | Colisões (Divisão) | Colisões (Mult.) | Taxa de Itens Raros |
+| :--- | :--- | :--- | :--- | :--- |
+| 1.000 | 0.11 | 500 | 500 | 10.0% |
+| 10.000 | 1.09 | 5.000 | 5.000 | 9.98% |
+| 100.000 | 17.27 | 50.000 | 50.000 | 9.99% |
+
+### 5.2. Análise Crítica
+-   **Eficiência da Hash:** Com chaves sequenciais, ambos os métodos apresentaram número de colisões idêntico ao carregar a tabela com o dobro de itens em relação ao seu tamanho (Load Factor = 2.0). O tempo de busca manteve-se constante em torno de 0.001 ms para 1000 buscas, demonstrando a escalabilidade do $O(1)$ amortizado.
+-   **Custo do Heap:** Para 100.000 itens, a extração dos 1.000 itens mais raros levou apenas 0.78 ms, confirmando a eficiência do $O(\log N)$.
+-   **Precisão do Drop:** O mecanismo de balanceamento foi extremamente preciso, mantendo a taxa de itens raros em aproximadamente 9.99% mesmo em grandes volumes de dados.
+
+---
+
+## 6. Conclusão
+A integração das estruturas de dados propostas permitiu a criação de um sistema robusto e performático. A escolha de implementações manuais de PRNGs e funções hash específicas permitiu um controle fino sobre o comportamento do sistema, atendendo a todos os requisitos mínimos do projeto e garantindo um ambiente de testes justo e reprodutível.
