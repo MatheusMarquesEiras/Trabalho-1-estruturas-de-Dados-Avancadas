@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include <vector>
 #include "Item.hpp"
 #include "PRNG.hpp"
@@ -6,11 +7,40 @@
 #include "MaxHeap.hpp"
 #include "DropSystem.hpp"
 
-int main() {
-    LCG lcg(123);
-    XORShift xorshift(123);
+int main(int argc, char* argv[]) {
+    uint32_t seed = static_cast<uint32_t>(argc);
+    for (int i = 1; i < argc; ++i) {
+        std::string arg = argv[i];
+        if (arg == "-s" || arg == "--seed") {
+            if (i + 1 >= argc) {
+                std::cerr << "Erro: a opcao -s requer um valor de seed." << std::endl;
+                return 1;
+            }
+            try {
+                seed = static_cast<uint32_t>(std::stoul(argv[++i]));
+            } catch (const std::exception&) {
+                std::cerr << "Erro: seed invalida: " << argv[i] << std::endl;
+                return 1;
+            }
+        } else if (arg.rfind("-s", 0) == 0 && arg.size() > 2) {
+            try {
+                seed = static_cast<uint32_t>(std::stoul(arg.substr(2)));
+            } catch (const std::exception&) {
+                std::cerr << "Erro: seed invalida: " << arg.substr(2) << std::endl;
+                return 1;
+            }
+        } else {
+            std::cerr << "Opcao desconhecida: " << arg << std::endl;
+            std::cerr << "Uso: " << argv[0] << " [-s <seed>]" << std::endl;
+            return 1;
+        }
+    }
+
+    LCG lcg(seed);
+    XORShift xorshift(seed);
     
     std::cout << "--- Sistema de Inventario e Drop Balanceado ---" << std::endl;
+    std::cout << "Seed usada: " << seed << std::endl;
     
     // Demonstrate PRNG
     std::cout << "LCG (primeiros 5): ";
