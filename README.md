@@ -41,11 +41,11 @@ make all
     ```bash
     ./main
     ```
-    Para seed's personalizadas e maiores que 1, podemos ter por exemplo a seed 123.
+    Para seed's personalizadas com um pu mais caracteres inteiros, podemos ter por exemplo a seed 123.
     ```bash
     ./main -s 123
     ```
-    
+
 2.  **Testes de Benchmark:**
     Roda a análise de performance com grandes entradas de dados e exibe estatísticas de colisões e tempo.
     ```bash
