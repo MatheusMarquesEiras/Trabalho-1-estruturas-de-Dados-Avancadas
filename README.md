@@ -41,7 +41,7 @@ make all
     ```bash
     ./main
     ```
-    Para seed's personalizadas com um pu mais caracteres inteiros, podemos ter por exemplo a seed 123.
+    Para seed's personalizadas com um ou mais caracteres inteiros, podemos ter por exemplo a seed 123.
     ```bash
     ./main -s 123
     ```
