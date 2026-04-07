@@ -37,11 +37,15 @@ make all
 ### Execução
 
 1.  **Demonstração Principal:**
-    Roda o fluxo básico: gera itens, insere no inventário, organiza no heap e busca um item específico.
+    Roda o fluxo básico: gera itens, insere no inventário, organiza no heap e busca um item específico com seed = 1.
     ```bash
     ./main
     ```
-
+    Para seed's personalizadas e maiores que 1, podemos ter por exemplo a seed 123.
+    ```bash
+    ./main -s 123
+    ```
+    
 2.  **Testes de Benchmark:**
     Roda a análise de performance com grandes entradas de dados e exibe estatísticas de colisões e tempo.
     ```bash
