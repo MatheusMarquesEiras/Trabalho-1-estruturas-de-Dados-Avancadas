@@ -1,5 +1,7 @@
 # Sistema de Inventário e Drop Balanceado (Normas IFPR)
 
+# Integrantes: Matheus Marques Eiras e Ciro
+
 Este projeto implementa o núcleo de um sistema de inventário para jogos, focado em estruturas de dados eficientes e geração de números pseudo-aleatórios (PRNG) com controle de economia (Drop Balanceado). Desenvolvido como parte dos requisitos de Estruturas de Dados Avançadas do IFPR.
 
 ## 🚀 Funcionalidades Implementadas
@@ -60,8 +62,28 @@ make clean
 
 ---
 
-## 📂 Estrutura de Arquivos
-*   `/include`: Cabeçalhos (`.hpp`) com as implementações das estruturas.
-*   `/src`: Código fonte do programa principal.
-*   `/tests`: Scripts de teste e medição de performance.
-*   `RELATORIO.md`: Documentação técnica detalhada e análise crítica (base para o relatório final).
+## 📂 Descrição dos Arquivos
+
+### Diretórios
+
+*   **`/include`** - Cabeçalhos contendo implementações das estruturas de dados
+    *   `HashTable.hpp`: Implementação de tabela hash com método da divisão e multiplicação
+    *   `MaxHeap.hpp`: Implementação de heap máximo para organização por raridade
+    *   `Item.hpp`: Estrutura de dados que representa um item do inventário
+    *   `PRNG.hpp`: Geradores de números pseudo-aleatórios (LCG e XORShift)
+    *   `DropSystem.hpp`: Sistema de drop balanceado com ajuste automático de probabilidades
+
+*   **`/src`** - Código-fonte principal
+    *   `main.cpp`: Programa principal que demonstra o funcionamento do sistema com suporte a seeds personalizadas
+
+*   **`/tests`** - Testes e benchmarks
+    *   `benchmark.cpp`: Suite de testes de performance com volumes crescentes (1k a 100k itens)
+
+### Arquivos de Configuração
+
+*   **`Makefile`** - Arquivo de compilação com targets: `all`, `clean`, `main`, `benchmark`
+*   **`README.md`** - Este arquivo com documentação do projeto
+
+### Arquivo de Relatório
+
+*   **`RELATORIO.md`** - Documentação técnica detalhada, análise crítica das estruturas e cálculos de complexidade
